@@ -2,12 +2,14 @@
 #define PI 3.1415
 
 
-Controller::Controller(float Pv, float Iv, float Po, float Io){
+Controller::Controller(float Pv, float Iv, float Dv, float Po, float Io, float Do){
         // Initialize controller parameters
         this->Pv = Pv;
         this->Iv = Iv;
+        this->Dv = Dv;
         this->Po = Po;
         this->Io = Io;
+        this->Do = Do;
         this->integrativeEuclideanError = 0;
         this->integrativeAngularError = 0;
 
@@ -25,14 +27,17 @@ Controller::Controller(float Pv, float Iv, float Po, float Io){
         this->distance = 0.0;
         this->angularDistance = 0.0;
         this->lastLinearError = 0.0;
+        this->lastAngularError = 0.0;
 }
 
-void Controller::setControllerParameters(float Pv, float Iv, float Po, float Io)
+void Controller::setControllerParameters(float Pv, float Iv, float Dv, float Po, float Io, float Do)
 {
     this->Pv = Pv;
     this->Iv = Iv;
+    this->Dv = Dv;
     this->Po = Po;
     this->Io = Io;
+    this->Do = Do;
 
     this->reset();
 }
@@ -119,17 +124,18 @@ geometry_msgs::msg::Twist Controller::getControlSignal()
     this->integrativeEuclideanError += currentEuclideanError;
     this->integrativeAngularError += currentAngularError;
 
-    float derivativeValue = currentEuclideanError - this->lastLinearError;
+    float linearDerivativeValue = currentEuclideanError - this->lastLinearError;
+    float angularDerivativeValue = currentAngularError - this->lastAngularError;
 
     this->saturateIntegrators();
 
     geometry_msgs::msg::Twist msg;
-    float Dv = 0.8;
+    // D = 0.8;
     // P = 0.33
     // I = 0.04
 
-    msg.linear.x = this->Pv*currentEuclideanError + this->Iv*this->integrativeEuclideanError + Dv*derivativeValue;
-    msg.angular.z = this->Po*currentAngularError + this->Io*this->integrativeAngularError;
+    msg.linear.x = this->Pv*currentEuclideanError + this->Iv*this->integrativeEuclideanError + this->Dv*linearDerivativeValue;
+    msg.angular.z = this->Po*currentAngularError + this->Io*this->integrativeAngularError + this->Dv*angularDerivativeValue;
 
     std::cout<<"[Controller] The current linear error is "<< currentEuclideanError << std::endl;
     std::cout<<"[Controller] The current integrative linear buffer is "<< this->integrativeEuclideanError << std::endl;
@@ -137,6 +143,7 @@ geometry_msgs::msg::Twist Controller::getControlSignal()
     std::cout<<"[Controller] The current integrative angular buffer is "<< this->integrativeAngularError << std::endl;
 
     this->lastLinearError = currentEuclideanError;
+    this->lastAngularError = currentAngularError;
     return  msg;
 }
 

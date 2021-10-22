@@ -84,6 +84,12 @@ def generate_launch_description():
         name='linear_controller',
         parameters=[{'use_sim_time': True}],
         output='screen')
+
+    gui = Node(
+        package='config_gui',
+        executable='control_gui',
+        name='control_gui',
+        output='screen')
         
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -110,6 +116,7 @@ def generate_launch_description():
         gazebo,        
         robot_state_publisher,
         #start_scooby_teleop_cmd,
-        controller
+        controller,
+        gui
         #rviz
     ])

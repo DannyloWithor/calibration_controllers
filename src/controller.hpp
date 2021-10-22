@@ -12,8 +12,10 @@ class Controller
 {
     float Pv;                                       // Proportial term of the controller
     float Iv;                                       // Integrative term of the controller
+    float Dv;                                       // Derivative term of the controller
     float Po;                                       // Proportial term of the controller
     float Io;                                       // Integrative term of the controller
+    float Do;                                       // Derivative term of the controller
     float integrativeEuclideanError;
     float integrativeAngularError;
     std::array<double,3> setpoint;                 // Setpoint pose, in terms of [x y th] in the map frame
@@ -21,11 +23,12 @@ class Controller
     float distance;
     float angularDistance;
     float lastLinearError;
+    float lastAngularError;
 
     public:
 
     /// \brief Defines the controller object, with default parameters
-    Controller(float Pv, float Iv, float Po, float Io);
+    Controller(float Pv, float Iv, float Dv, float Po, float Io, float Do);
 
     /// \brief Sets the setpoint for the control task
     void setSetpoint(std::array<double,3> setpoint);
@@ -34,7 +37,7 @@ class Controller
     void setCurrentPose(double x, double y, double th);
 
     /// \brief Changes the controller default parameters
-    void setControllerParameters(float Pv, float Iv, float Po, float Io);
+    void setControllerParameters(float Pv, float Iv, float Dv, float Po, float Io, float Do);
     
     /// \brief Resets setpoint information and integrative errors
     void reset();

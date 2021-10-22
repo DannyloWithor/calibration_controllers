@@ -114,7 +114,7 @@ class LinearController : public rclcpp::Node
     std::array<double,3> robot_pose;
 
     /// \brief Defines the controller object
-    Controller controller = Controller(0.1, 0.1, 0.1, 0.1);
+    Controller controller = Controller(0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
 
     /// \brief Defines the timer object
     rclcpp::TimerBase::SharedPtr timer_;
@@ -144,9 +144,9 @@ class LinearController : public rclcpp::Node
 
   void control_callback(const localization_interfaces::msg::ControlMsgs::SharedPtr control_msg)
   {
-    RCLCPP_INFO(this->get_logger(), "Control message received: Type= %03d,  P= %03f, I= %03f, Setpoint= %03f ", 	
+    RCLCPP_INFO(this->get_logger(), "Control message received: Type= %03d,  P= %03f, I= %03f, D= %03f, Setpoint= %03f ", 	
             (int) control_msg->type,
-            (float) control_msg->p, (float) control_msg->i, (float) control_msg->setpoint);
+            (float) control_msg->p, (float) control_msg->i, (float) control_msg->d, (float) control_msg->setpoint);
 
     // Clean integrative errors buffer
     this->state = "Waiting";
@@ -161,14 +161,14 @@ class LinearController : public rclcpp::Node
       this->state = "Linear";
       this->setpoint[0] = control_msg->setpoint;
       this->setpoint[1] = 0.0;
-      this->controller.setControllerParameters(control_msg->p, control_msg->i, 0.0, 0.0);
+      this->controller.setControllerParameters(control_msg->p, control_msg->i, control_msg->d, 0.0, 0.0, 0.0);
 
     } else if (control_msg->type == 1)
     {
       this->state = "Angular";
       this->setpoint[0] = 0.0;
       this->setpoint[1] = control_msg->setpoint*deg2rad;
-      this->controller.setControllerParameters(0.0, 0.0, control_msg->p, control_msg->i);
+      this->controller.setControllerParameters(0.0, 0.0, 0.0, control_msg->p, control_msg->i, control_msg->d);
 
     } else if (control_msg->type == 2)
     {
